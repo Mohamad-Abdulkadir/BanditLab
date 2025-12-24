@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bandit Lab - Multi-Armed Bandit Simulator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Decorative Elements -->
+        <div class="casino-decor">
+            <div class="light-string top"></div>
+        </div>
+
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-text">
+                        <h1>Bandit Lab</h1>
+                        <div class="subtitle-badge">ALGORITHM SIMULATOR</div>
+                    </div>
+                </div>
+                <p class="tagline">Interactive exploration of multi-armed bandit algorithms</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Slot Machine Control Panel -->
+            <section class="control-panel">
+                <div class="panel-frame">
+                    <div class="panel-header">
+                        <div class="casino-badge">SIMULATION SETTINGS</div>
+                    </div>
+
+                    <div class="tip-banner">
+                        <strong>Tip:</strong> Try running with default parameters first to see how each algorithm performs, then experiment with different settings.
+                    </div>
+
+                    <!-- Slot Machine Setup -->
+                    <div class="control-group">
+                        <h3 class="group-title">
+                            Environment
+                        </h3>
+                        
+                        <div class="control-item">
+                            <label for="numArms">
+                                <span class="tooltip-wrapper">
+                                    Number of Machines
+                                    <span class="info-icon">?</span>
+                                    <span class="tooltip-content tooltip-left">More machines make the problem harder. The algorithm must explore more options to find the best one, increasing the exploration-exploitation tradeoff difficulty.</span>
+                                </span>
+                            </label>
+                            <div class="input-wrapper">
+                                <input type="number" id="numArms" min="2" max="10" value="5">
+                                <span class="input-hint">2-10 slots</span>
+                            </div>
+                        </div>
+
+                        <div class="control-item">
+                            <label for="numSteps">
+                                <span class="tooltip-wrapper">
+                                    Total Pulls
+                                    <span class="info-icon">?</span>
+                                    <span class="tooltip-content tooltip-left">The total number of arm pulls (iterations). More pulls allow algorithms to converge better but also accumulate more regret from early exploration.</span>
+                                </span>
+                            </label>
+                            <div class="input-wrapper">
+                                <input type="number" id="numSteps" min="100" max="10000" step="100" value="1000">
+                                <span class="input-hint">pulls</span>
+                            </div>
+                        </div>
+
+                        <div class="control-item">
+                            <label>
+                                <span class="tooltip-wrapper">
+                                    Win Probabilities
+                                    <span class="info-icon">?</span>
+                                    <span class="tooltip-content tooltip-left">The true reward probability for each arm. These are hidden from algorithms during simulation. Arms with similar probabilities are harder to distinguish.</span>
+                                </span>
+                            </label>
+                            <div id="probsContainer" class="probs-container">
+                                <!-- Dynamically generated -->
+                            </div>
+                            <button id="randomizeProbs" class="btn btn-secondary btn-sm">
+                                Randomize
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Agent Selection -->
+                    <div class="control-group">
+                        <h3 class="group-title">
+                            Algorithms
+                        </h3>
+                        
+                        <div class="algorithm-toggles">
+                            <label class="toggle-item active" data-algorithm="random">
+                                <input type="checkbox" checked>
+                                <span class="toggle-label">Random<br><small>Baseline</small></span>
+                            </label>
+                            
+                            <label class="toggle-item active" data-algorithm="ucb">
+                                <input type="checkbox" checked>
+                                <span class="toggle-label">UCB</span>
+                            </label>
+                            
+                            <label class="toggle-item active" data-algorithm="epsilon">
+                                <input type="checkbox" checked>
+                                <span class="toggle-label">ε-Greedy</span>
+                            </label>
+                            
+                            <label class="toggle-item active" data-algorithm="thompson">
+                                <input type="checkbox" checked>
+                                <span class="toggle-label">Thompson</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- UCB Parameters -->
+                    <div class="control-group param-group" id="ucbParams">
+                        <h3 class="group-title">
+                            UCB Parameters
+                        </h3>
+                        
+                        <div class="control-item">
+                            <label for="ucbC">
+                                <span class="tooltip-wrapper">
+                                    Confidence Level (c)
+                                    <span class="info-icon">?</span>
+                                    <span class="tooltip-content tooltip-left">Controls the exploration bonus in UCB. Higher values add more uncertainty bonus to less-explored arms, encouraging exploration. Lower values favor exploitation of known good arms.</span>
+                                </span>
+                            </label>
+                            <div class="slider-wrapper">
+                                <input type="range" id="ucbC" min="0.1" max="3" step="0.1" value="1.0">
+                                <span class="slider-value" id="ucbCValue">1.0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Epsilon Greedy Parameters -->
+                    <div class="control-group param-group" id="epsilonParams">
+                        <h3 class="group-title">
+                            ε-Greedy Parameters
+                        </h3>
+                        
+                        <div class="control-item">
+                            <label for="epsilon">
+                                <span class="tooltip-wrapper">
+                                    Exploration Rate (ε)
+                                    <span class="info-icon">?</span>
+                                    <span class="tooltip-content tooltip-left">The probability of choosing a random arm instead of the best known arm. ε=0.1 means 10% random exploration. Higher values explore more but may miss optimal rewards.</span>
+                                </span>
+                            </label>
+                            <div class="slider-wrapper">
+                                <input type="range" id="epsilon" min="0.01" max="1" step="0.01" value="0.1">
+                                <span class="slider-value" id="epsilonValue">0.10</span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Thompson Sampling Parameters -->
+                    <div class="control-group param-group" id="thompsonParams">
+                        <h3 class="group-title">
+                            Thompson Parameters
+                        </h3>
+                        
+                        <div class="control-item">
+                            <label for="priorAlpha">
+                                <span class="tooltip-wrapper">
+                                    Prior Wins (α)
+                                    <span class="info-icon">?</span>
+                                    <span class="tooltip-content tooltip-left">Initial assumed successes for Beta distribution. Higher α relative to β makes the algorithm initially optimistic about arm rewards, which can speed up convergence.</span>
+                                </span>
+                            </label>
+                            <div class="slider-wrapper">
+                                <input type="range" id="priorAlpha" min="0.1" max="10" step="0.1" value="1.0">
+                                <span class="slider-value" id="priorAlphaValue">1.0</span>
+                            </div>
+                        </div>
+
+                        <div class="control-item">
+                            <label for="priorBeta">
+                                <span class="tooltip-wrapper">
+                                    Prior Losses (β)
+                                    <span class="info-icon">?</span>
+                                    <span class="tooltip-content tooltip-left">Initial assumed failures for Beta distribution. Higher β relative to α makes the algorithm initially pessimistic, causing more exploration before settling on an arm.</span>
+                                </span>
+                            </label>
+                            <div class="slider-wrapper">
+                                <input type="range" id="priorBeta" min="0.1" max="10" step="0.1" value="1.0">
+                                <span class="slider-value" id="priorBetaValue">1.0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pull the Lever! -->
+                    <div class="action-buttons">
+                        <button id="runSimulation" class="btn btn-primary btn-large lever-btn">
+                            <span class="lever-text">RUN SIMULATION</span>
+                        </button>
+                        <button id="resetSimulation" class="btn btn-outline">
+                            <span class="btn-icon">↺</span>
+                            Reset
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section class="results-section">
+                <!-- Slot Machines Visual Display -->
+                <div class="slot-machines-display" id="slotMachinesDisplay">
+                    <div class="section-header">
+                        <h2>Slot Machines (Arms)</h2>
+                        <p>Each arm has a fixed but initially unknown reward probability</p>
+                    </div>
+                    <div class="slot-machines-row" id="slotMachinesRow">
+                        <!-- Dynamically generated slot machine visuals -->
+                    </div>
+                </div>
+
+                <!-- Winner Display -->
+                <div class="winner-display" id="winnerDisplay">
+                    <div class="winner-content">
+                        <span class="trophy">🏆</span>
+                        <span class="winner-text">Run simulation to see results!</span>
+                    </div>
+                </div>
+
+                <!-- Summary Cards -->
+                <div class="summary-cards" id="summaryCards">
+                    <!-- Dynamically generated -->
+                </div>
+
+                <!-- Charts - Full Width -->
+                <div class="charts-container">
+                    <div class="chart-note" id="varianceNote" style="display: none;">
+                        <strong>Note:</strong> The "Optimal" line shows the <em>expected</em> reward (probability × pulls). 
+                        Due to random variance, actual results can exceed this—getting "lucky" with more wins than statistically expected. 
+                        This is normal and demonstrates the stochastic nature of the problem.
+                    </div>
+                    <div class="chart-card chart-full-width">
+                        <div class="chart-header">
+                            <h3>Cumulative Reward</h3>
+                            <p>Total rewards accumulated over time</p>
+                        </div>
+                        <div class="chart-wrapper chart-wide">
+                            <canvas id="rewardsChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-card chart-full-width">
+                        <div class="chart-header">
+                            <h3>Cumulative Regret</h3>
+                            <p>Difference from optimal strategy</p>
+                        </div>
+                        <div class="chart-wrapper chart-wide">
+                            <canvas id="regretChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-card chart-full-width">
+                        <div class="chart-header">
+                            <h3>Exploration Rate</h3>
+                            <p>Fraction of non-greedy actions taken over time</p>
+                        </div>
+                        <div class="chart-wrapper chart-wide">
+                            <canvas id="explorationChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slot Machine Distribution -->
+                <div class="arm-distribution" id="armDistribution">
+                    <div class="chart-header">
+                        <h3>Arm Selection Distribution</h3>
+                        <p>Frequency of pulls per arm for each algorithm</p>
+                    </div>
+                    <div class="arm-charts" id="armCharts">
+                        <!-- Dynamically generated -->
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <p>An interactive visualization of the multi-armed bandit problem</p>
+                <p class="footer-links">
+                    <a href="learn.html">Learn more about MAB</a>
+                </p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="js/core.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

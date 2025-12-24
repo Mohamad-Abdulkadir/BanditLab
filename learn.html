@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learn - Bandit Lab</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        .learn-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: var(--spacing-xl);
+        }
+
+        .learn-header {
+            text-align: center;
+            margin-bottom: var(--spacing-2xl);
+        }
+
+        .learn-header h1 {
+            font-family: var(--font-display);
+            font-size: 2.5rem;
+            color: var(--casino-red);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .learn-header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            color: var(--casino-blue);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: var(--spacing-xl);
+            transition: var(--transition-fast);
+        }
+
+        .back-link:hover {
+            color: var(--casino-purple);
+        }
+
+        .section {
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .section h2 {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-md);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .section h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: var(--spacing-lg) 0 var(--spacing-sm) 0;
+        }
+
+        .section p {
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .section ul {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-left: var(--spacing-lg);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .section li {
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .formula-box {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-md) var(--spacing-lg);
+            margin: var(--spacing-md) 0;
+            overflow-x: auto;
+            text-align: center;
+        }
+
+        .algorithm-card {
+            border-left: 4px solid var(--casino-gold);
+            padding-left: var(--spacing-md);
+            margin: var(--spacing-lg) 0;
+        }
+
+        .algorithm-card.ucb {
+            border-color: var(--color-ucb);
+        }
+
+        .algorithm-card.epsilon {
+            border-color: var(--color-epsilon);
+        }
+
+        .algorithm-card.thompson {
+            border-color: var(--color-thompson);
+        }
+
+        .algorithm-card.random {
+            border-color: var(--color-random);
+        }
+
+        .algorithm-card h3 {
+            margin-top: 0;
+        }
+
+        .highlight {
+            background: rgba(255, 183, 3, 0.15);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .application-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-md);
+        }
+
+        .application-item {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-md);
+            text-align: center;
+        }
+
+        .application-item .icon {
+            font-size: 2rem;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .application-item h4 {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .application-item p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .key-concept {
+            display: flex;
+            gap: var(--spacing-md);
+            background: rgba(33, 158, 188, 0.1);
+            border-left: 3px solid var(--casino-blue);
+            padding: var(--spacing-md);
+            border-radius: var(--radius-sm);
+            margin: var(--spacing-md) 0;
+        }
+
+        .key-concept strong {
+            color: var(--casino-blue);
+            white-space: nowrap;
+        }
+
+        .key-concept p {
+            margin: 0;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: var(--spacing-md) 0;
+            font-size: 0.9rem;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: var(--spacing-sm) var(--spacing-md);
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .comparison-table th {
+            background: var(--bg-tertiary);
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .comparison-table td {
+            color: var(--text-secondary);
+        }
+
+        .try-simulator {
+            text-align: center;
+            padding: var(--spacing-xl);
+            background: linear-gradient(135deg, rgba(255, 183, 3, 0.1) 0%, rgba(230, 57, 70, 0.1) 100%);
+            border-radius: var(--radius-lg);
+            margin-top: var(--spacing-xl);
+        }
+
+        .try-simulator h3 {
+            font-family: var(--font-display);
+            font-size: 1.3rem;
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .try-simulator .btn {
+            display: inline-flex;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="casino-decor">
+            <div class="light-string top"></div>
+        </div>
+
+        <div class="learn-container">
+            <a href="index.html" class="back-link">← Back to Simulator</a>
+
+            <div class="learn-header">
+                <h1>The Multi-Armed Bandit Problem</h1>
+                <p>Understanding the exploration-exploitation tradeoff</p>
+            </div>
+
+            <!-- Introduction Section -->
+            <div class="section">
+                <h2>What is the Multi-Armed Bandit Problem?</h2>
+                <p>
+                    Imagine you're in a casino facing a row of slot machines (historically called "one-armed bandits"). 
+                    Each machine has a different, unknown probability of paying out. You have a limited number of pulls—how do you 
+                    maximize your total winnings?
+                </p>
+                <p>
+                    This is the <span class="highlight">Multi-Armed Bandit (MAB)</span> problem: a classic framework in decision-making 
+                    under uncertainty. The challenge lies in balancing two competing objectives:
+                </p>
+
+                <div class="key-concept">
+                    <strong>Exploration:</strong>
+                    <p>Trying different arms to learn their reward probabilities</p>
+                </div>
+                <div class="key-concept">
+                    <strong>Exploitation:</strong>
+                    <p>Pulling the arm that currently appears best to maximize reward</p>
+                </div>
+
+                <p>
+                    Too much exploration wastes pulls on suboptimal arms. Too much exploitation risks missing the truly best arm. 
+                    Finding the optimal balance is what MAB algorithms aim to solve.
+                </p>
+            </div>
+
+            <!-- Applications Section -->
+            <div class="section">
+                <h2>Real-World Applications</h2>
+                <p>
+                    The MAB framework extends far beyond casinos. Any scenario involving sequential decisions with uncertain 
+                    outcomes can be modeled as a bandit problem:
+                </p>
+
+                <div class="application-grid">
+                    <div class="application-item">
+                        <div class="icon">🔬</div>
+                        <h4>Clinical Trials</h4>
+                        <p>Allocate patients to treatments while learning which is most effective</p>
+                    </div>
+                    <div class="application-item">
+                        <div class="icon">📱</div>
+                        <h4>A/B Testing</h4>
+                        <p>Optimize website layouts, ads, or features in real-time</p>
+                    </div>
+                    <div class="application-item">
+                        <div class="icon">🎯</div>
+                        <h4>Ad Placement</h4>
+                        <p>Select which ads to show to maximize click-through rates</p>
+                    </div>
+                    <div class="application-item">
+                        <div class="icon">🤖</div>
+                        <h4>Recommendation Systems</h4>
+                        <p>Suggest content while learning user preferences</p>
+                    </div>
+                    <div class="application-item">
+                        <div class="icon">📡</div>
+                        <h4>Network Routing</h4>
+                        <p>Choose communication channels with unknown reliability</p>
+                    </div>
+                    <div class="application-item">
+                        <div class="icon">💰</div>
+                        <h4>Portfolio Optimization</h4>
+                        <p>Allocate investments across assets with uncertain returns</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Algorithms Section -->
+            <div class="section">
+                <h2>Bandit Algorithms</h2>
+                <p>
+                    Several algorithms have been developed to solve the MAB problem. Each takes a different approach 
+                    to the exploration-exploitation tradeoff.
+                </p>
+
+                <!-- Random -->
+                <div class="algorithm-card random">
+                    <h3>Random (Baseline)</h3>
+                    <p>
+                        Selects arms uniformly at random, ignoring past observations. This serves as a baseline—any 
+                        reasonable algorithm should outperform pure random selection.
+                    </p>
+                    <div class="formula-box">
+                        \[P(A_t = a) = \frac{1}{K} \quad \text{for all arms } a \in \{1, \ldots, K\}\]
+                    </div>
+                    <p><strong>Pros:</strong> Simple, no parameters<br>
+                    <strong>Cons:</strong> Does not learn; linear regret growth</p>
+                </div>
+
+                <!-- UCB -->
+                <div class="algorithm-card ucb">
+                    <h3>Upper Confidence Bound (UCB)</h3>
+                    <p>
+                        UCB follows the principle of <em>"optimism in the face of uncertainty."</em> It selects the arm with 
+                        the highest upper confidence bound—a combination of estimated reward plus an exploration bonus that 
+                        decreases as the arm is pulled more.
+                    </p>
+                    <div class="formula-box">
+                        \[A_t = \arg\max_a \left[ \hat{\mu}_a + c \sqrt{\frac{\ln t}{N_a(t)}} \right]\]
+                    </div>
+                    <p>
+                        Where \(\hat{\mu}_a\) is the empirical mean reward of arm \(a\), \(N_a(t)\) is the number of times 
+                        arm \(a\) has been pulled, and \(c\) is a confidence parameter.
+                    </p>
+                    <p><strong>Pros:</strong> Strong theoretical guarantees; logarithmic regret<br>
+                    <strong>Cons:</strong> Can be slow to converge with many arms</p>
+                </div>
+
+                <!-- Epsilon-Greedy -->
+                <div class="algorithm-card epsilon">
+                    <h3>ε-Greedy (Epsilon-Greedy)</h3>
+                    <p>
+                        A simple yet effective strategy: with probability \(\varepsilon\), explore by choosing a random arm; 
+                        otherwise, exploit by choosing the arm with the highest observed mean reward.
+                    </p>
+                    <div class="formula-box">
+                        \[A_t = \begin{cases} \text{random arm} & \text{with probability } \varepsilon \\ \arg\max_a \hat{\mu}_a & \text{with probability } 1 - \varepsilon \end{cases}\]
+                    </div>
+                    <p>
+                        The parameter \(\varepsilon\) controls the exploration rate. Common values range from 0.01 to 0.1.
+                    </p>
+                    <p><strong>Pros:</strong> Simple to implement and tune<br>
+                    <strong>Cons:</strong> Fixed exploration rate may not be optimal; explores uniformly rather than targeting uncertainty</p>
+                </div>
+
+                <!-- Thompson Sampling -->
+                <div class="algorithm-card thompson">
+                    <h3>Thompson Sampling</h3>
+                    <p>
+                        A Bayesian approach that maintains a probability distribution over each arm's true reward rate. 
+                        At each step, it samples from these distributions and selects the arm with the highest sample.
+                    </p>
+                    <p>
+                        For binary rewards (win/lose), we use Beta distributions:
+                    </p>
+                    <div class="formula-box">
+                        \[\theta_a \sim \text{Beta}(\alpha_a, \beta_a)\]
+                        \[A_t = \arg\max_a \theta_a\]
+                    </div>
+                    <p>
+                        After observing reward \(r \in \{0, 1\}\), update: \(\alpha_a \leftarrow \alpha_a + r\) and 
+                        \(\beta_a \leftarrow \beta_a + (1 - r)\).
+                    </p>
+                    <p><strong>Pros:</strong> Often achieves best empirical performance; naturally balances exploration/exploitation<br>
+                    <strong>Cons:</strong> Requires specifying prior distributions</p>
+                </div>
+            </div>
+
+            <!-- Comparison Section -->
+            <div class="section">
+                <h2>Algorithm Comparison</h2>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Algorithm</th>
+                            <th>Approach</th>
+                            <th>Regret Bound</th>
+                            <th>Best For</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Random</strong></td>
+                            <td>Uniform random</td>
+                            <td>O(T) - Linear</td>
+                            <td>Baseline comparison</td>
+                        </tr>
+                        <tr>
+                            <td><strong>UCB</strong></td>
+                            <td>Optimistic estimates</td>
+                            <td>O(log T)</td>
+                            <td>When theoretical guarantees matter</td>
+                        </tr>
+                        <tr>
+                            <td><strong>ε-Greedy</strong></td>
+                            <td>Random exploration</td>
+                            <td>O(T) or O(log T)*</td>
+                            <td>Simple problems; quick implementation</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Thompson</strong></td>
+                            <td>Bayesian sampling</td>
+                            <td>O(log T)</td>
+                            <td>Best empirical performance</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p style="font-size: 0.8rem; color: var(--text-muted);">
+                    *ε-Greedy achieves O(log T) regret only with a decaying exploration rate.
+                </p>
+            </div>
+
+            <!-- Key Metrics Section -->
+            <div class="section">
+                <h2>Key Metrics</h2>
+
+                <h3>Cumulative Reward</h3>
+                <p>The total reward accumulated over all pulls. Higher is better.</p>
+                <div class="formula-box">
+                    \[\text{Cumulative Reward} = \sum_{t=1}^{T} R_t\]
+                </div>
+
+                <h3>Cumulative Regret</h3>
+                <p>
+                    The difference between the optimal strategy (always pulling the best arm) and the algorithm's actual 
+                    performance. Lower is better.
+                </p>
+                <div class="formula-box">
+                    \[\text{Regret}(T) = T \cdot \mu^* - \sum_{t=1}^{T} R_t\]
+                </div>
+                <p>
+                    Where \(\mu^*\) is the true probability of the best arm. Good algorithms have regret that grows 
+                    sub-linearly (ideally logarithmically) in \(T\).
+                </p>
+            </div>
+
+            <!-- Try the Simulator -->
+            <div class="try-simulator">
+                <h3>Ready to see these algorithms in action?</h3>
+                <a href="index.html" class="btn btn-primary">Try the Simulator →</a>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <div class="footer-content">
+                <p>An interactive visualization of the multi-armed bandit problem</p>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>
